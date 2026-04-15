@@ -1,0 +1,121 @@
+<% layout("/layouts/boilerplate") %>
+
+<!-- Group all listings by country -->
+<% 
+const grouped = {};
+    for (let lst of allListings) {
+        const key = lst.country || "Other";
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(lst);
+    }
+    const countries = Object.keys(grouped); 
+  %>
+
+<div class="listings-page">
+    <% for (let i = 0; i < countries.length; i++) { %>
+        <%
+            const country = countries[i];
+            const listings = grouped[country];
+            const rowId = "row-" + i;
+        %>
+        <div class="listing-section mb-5">
+            <div class="section-header d-flex align-items-center justify-content-between mb-3">
+                <h5 class="section-title mb-0">
+                    Places in <%= country %>
+                <a href="#" class="section-arrow ms-2" title="See all in <%= country %>">
+                    <i class="fa-solid fa-arrow-right-long"></i>
+                </a>
+            </h5>
+            <div class="scroll-controls">
+                <button class="scroll-btn scroll-prev" data-row="<%= rowId %>" aria-label="Previous" disabled>
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button class="scroll-btn scroll-next" data-row="<%= rowId %>" aria-label="Next">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        <div class="cards-row" id="<%= rowId %>">
+            <% for (let listing of listings) { %>
+            <%
+                const idStr = listing._id.toString();
+                const ratingVal = (4.0 + (parseInt(idStr.slice(-2), 16) / 255)).toFixed(2);
+            %>
+            <div class="listing-card">
+                <div class="card-img-wrapper">
+                <% const imageUrl = (listing.image && (listing.image.url || listing.image)) || "https://shorturl.at/Jp14Z"; %>
+                <a href="/listings/<%= listing._id %>">
+                    <img src="<%= imageUrl %>" alt="<%= listing.title %>" class="card-img" loading="lazy" />
+                </a>
+                <button class="wishlist-btn" aria-label="Save to wishlist">
+                    <i class="fa-regular fa-heart"></i>
+                </button>
+                <div class="card-actions">
+                    <a href="/listings/<%= listing._id %>/edit" class="card-action-edit" title="Edit">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    <form class="card-action-form" method="POST" action="/listings/<%= listing._id %>?_method=DELETE" style="display:inline;">
+                        <button type="submit" class="card-action-delete" title="Delete" onclick="return confirm('Are you sure you want to delete this listing?');">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+                </div>
+                <div class="card-body-custom">
+                <div class="d-flex justify-content-between align-items-start gap-1">
+                    <div class="card-location"><%= listing.title %></div>
+                    <div class="card-rating">
+                    <i class="fa-solid fa-star"></i> <%= ratingVal %>
+                    </div>
+                </div>
+                <div class="card-sub"><%= listing.location %>, <%= listing.country %></div>
+                <div class="card-price">
+                    <span class="taka-sign">৳</span><%= (listing.price * 2).toLocaleString("en-IN") %> <span class="per-night">for 2 nights</span>
+                </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+        </div>
+    <% } 
+    %>
+</div>
+
+<script>
+    document.querySelectorAll('.wishlist-btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        const icon = this.querySelector('i');
+        icon.classList.toggle('fa-regular');
+        icon.classList.toggle('fa-solid');
+        this.classList.toggle('active');
+        });
+    });
+
+    document.querySelectorAll('.scroll-prev, .scroll-next').forEach(btn => {
+        btn.addEventListener('click', function () {
+        const rowId = this.dataset.row;
+        const direction = this.classList.contains('scroll-next') ? 1 : -1;
+        const row = document.getElementById(rowId);
+        const card = row.querySelector('.listing-card');
+        if (!card) return;
+        const cardWidth = card.offsetWidth + 16;
+        const visibleCount = Math.max(1, Math.floor(row.offsetWidth / cardWidth));
+        row.scrollBy({ left: direction * cardWidth * visibleCount, behavior: 'smooth' });
+        });
+    });
+
+    document.querySelectorAll('.cards-row').forEach(row => {
+        function updateButtons() {
+        const rowId = row.id;
+        const prev = document.querySelector(`.scroll-prev[data-row="${rowId}"]`);
+        const next = document.querySelector(`.scroll-next[data-row="${rowId}"]`);
+        const atStart = row.scrollLeft <= 2;
+        const atEnd = row.scrollLeft + row.offsetWidth >= row.scrollWidth - 2;
+        if (prev) prev.disabled = atStart;
+        if (next) next.disabled = atEnd;
+        }
+        row.addEventListener('scroll', updateButtons, { passive: true });
+        updateButtons();
+    });
+</script>

@@ -1,0 +1,25 @@
+<% layout("/layouts/boilerplate") %>
+<div class="container listing-details-container">
+    <h3 class="listing-details-heading">Listings Details </h3>
+    <% const imageUrl = (listing.image && (listing.image.url || listing.image)) || "https://shorturl.at/Jp14Z"; %>
+    <div class="listing-image-wrapper">
+        <img src="<%= imageUrl %>" alt="<%= listing.title %>" class="listing-image" />
+    </div>
+    <ul class="listing-info">
+        <li><strong>Title:</strong> <%= listing.title %></li>
+        <li><strong>Description:</strong> <%= listing.description %></li>
+        <li><strong>Price:</strong> <span class="taka-sign">৳</span> <%= listing.price.toLocaleString("en-BD") %></li>
+        <li><strong>Location:</strong> <%= listing.location %></li>
+        <li><strong>Country:</strong> <%= listing.country %></li>
+    </ul>
+    <div class="listing-actions">
+        <a href="/listings/<%= listing._id %>/edit" class="action-btn btn-edit">
+            <i class="fa-solid fa-pen-to-square"></i> Edit this listing
+        </a>
+        <form class="action-form">
+            <button type="submit" formaction="/listings/<%= listing._id %>?_method=DELETE" class="action-btn btn-delete">
+                <i class="fa-solid fa-trash"></i> Delete this listing
+            </button>
+        </form>
+    </div>
+</div>
