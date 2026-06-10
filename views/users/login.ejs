@@ -1,0 +1,73 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo">
+                <i class="fa-regular fa-compass"></i>
+            </div>
+            <h2 class="auth-title">Welcome back</h2>
+            <p class="auth-subtitle">Log in to your WanderLust account</p>
+        </div>
+
+        <form action="/login" method="POST" class="auth-form" novalidate>
+            <div class="auth-field">
+                <label for="username" class="auth-label">
+                    <i class="fa-solid fa-user"></i> Username
+                </label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    class="auth-input"
+                    placeholder="Enter your username"
+                    required
+                    autocomplete="username"
+                />
+            </div>
+
+            <div class="auth-field">
+                <label for="password" class="auth-label">
+                    <i class="fa-solid fa-lock"></i> Password
+                </label>
+                <div class="auth-input-group">
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="auth-input"
+                        placeholder="Enter your password"
+                        required
+                        autocomplete="current-password"
+                    />
+                    <button type="button" class="toggle-password" onclick="togglePassword('password', this)" tabindex="-1">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="auth-btn">
+                Log In
+            </button>
+        </form>
+
+        <p class="auth-switch">
+            Don't have an account?
+            <a href="/signup" class="auth-link">Sign up</a>
+        </p>
+    </div>
+</div>
+
+<script>
+    function togglePassword(fieldId, btn) {
+        const input = document.getElementById(fieldId);
+        const icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fa-solid fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fa-solid fa-eye';
+        }
+    }
+</script>

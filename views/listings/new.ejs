@@ -1,7 +1,7 @@
 <% layout("/layouts/boilerplate") %>
 <div class="container new-listing-container">
     <h3 class="new-listing-heading">Create a New Listing</h3>
-    <form action="/listings" method="POST" novalidate class="needs-validation new-listing-form">
+    <form action="/listings" method="POST" enctype="multipart/form-data" novalidate class="needs-validation new-listing-form">
             <div class="mb-3">
                 <label for="title" class="form-label">Title:</label>
                 <input type="text" id="title" name="title" class="form-control" placeholder="Enter title" required>
@@ -12,15 +12,50 @@
                 <textarea id="description" name="description" class="form-control" placeholder="Enter description" required></textarea>
                 <div class="invalid-feedback"> Please enter a description. </div>
             </div>
-            <div class="mb-3">
-                <label for="image" class="form-label">Image URL:</label>
-                <input type="text" id="image" name="image[url]" class="form-control" placeholder="Enter image URL" required>
-                <div class="invalid-feedback"> Please enter a valid image URL. </div>
+            <div class="mb-4">
+                <label class="form-label">Category</label>
+                <div class="cat-picker">
+                    <% [
+                        { key: 'beach',       icon: 'fa-solid fa-umbrella-beach',  label: 'Beach'       },
+                        { key: 'city',        icon: 'fa-solid fa-city',            label: 'City'        },
+                        { key: 'mountains',   icon: 'fa-solid fa-mountain-sun',    label: 'Mountains'   },
+                        { key: 'cabins',      icon: 'fa-solid fa-tree',            label: 'Cabins'      },
+                        { key: 'pools',       icon: 'fa-solid fa-person-swimming', label: 'Pools'       },
+                        { key: 'lake',        icon: 'fa-solid fa-sailboat',        label: 'Lakefront'   },
+                        { key: 'island',      icon: 'fa-solid fa-water',           label: 'Islands'     },
+                        { key: 'desert',      icon: 'fa-solid fa-sun',             label: 'Desert'      },
+                        { key: 'rooms',       icon: 'fa-solid fa-door-open',       label: 'Rooms'       },
+                        { key: 'ski',         icon: 'fa-solid fa-person-skiing',   label: 'Skiing'      },
+                        { key: 'countryside', icon: 'fa-solid fa-leaf',            label: 'Countryside' },
+                    ].forEach(cat => { %>
+                    <label class="cat-tile">
+                        <input type="radio" name="category" value="<%= cat.key %>" class="cat-tile-input">
+                        <span class="cat-tile-body">
+                            <i class="<%= cat.icon %>"></i>
+                            <span><%= cat.label %></span>
+                        </span>
+                    </label>
+                    <% }); %>
+                </div>
             </div>
             <div class="mb-3">
-                <label for="price" class="form-label">Price:</label>
-                <input type="number" id="price" name="price" class="form-control" step="0.01" placeholder="e.g., ৳3,000 for 2 nights, ৳2,400 for 2 nights" required>
-                <div class="invalid-feedback"> Please enter a valid price. </div>
+                <%# <label for="image" class="form-label">Image URL:</label> %>
+                <%# <input type="text" id="image" name="image[url]" class="form-control" placeholder="Enter image URL" required> %>
+                <%# <div class="invalid-feedback"> Please enter a valid image URL. </div> %>
+                <label for="image" class="form-label">Listing Image:</label>
+                <input type="file" id="image" name="image" class="form-control" accept="image/jpeg,image/jpg,image/png">
+            </div>
+            <div class="row">
+                <div class="mb-3 col-md-8">
+                    <label for="price" class="form-label">Price (per night):</label>
+                    <input type="number" id="price" name="price" class="form-control" step="0.01" placeholder="e.g., 3000" required>
+                    <div class="invalid-feedback"> Please enter a valid price. </div>
+                </div>
+                <div class="mb-3 col-md-4">
+                    <label for="maxGuests" class="form-label">Max guests:</label>
+                    <input type="number" id="maxGuests" name="maxGuests" class="form-control" min="1" step="1" value="4" placeholder="4" required>
+                    <div class="invalid-feedback"> Please enter the guest capacity. </div>
+                </div>
             </div>
                 <div class="row">
                     <div class="mb-3 col-md-8">

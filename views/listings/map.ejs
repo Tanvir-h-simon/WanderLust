@@ -1,0 +1,134 @@
+<% layout("/layouts/boilerplate") %>
+<%
+    const currencyCode   = (currencyPreference && currencyPreference.currency) ? currencyPreference.currency : "USD";
+    const currencySymbol = (currencyPreference && currencyPreference.symbol)   ? currencyPreference.symbol   : "$";
+    const currencyRate   = (currencyPreference && currencyPreference.rate)     ? currencyPreference.rate     : 1;
+    const currencyLocale = (currencyPreference && currencyPreference.locale)   ? currencyPreference.locale   : "en-US";
+%>
+
+<div class="map-explore-container">
+
+  <!-- Back button -->
+  <a href="/listings<%= backQuery %>" class="map-back-btn">
+    <i class="fa-solid fa-arrow-left"></i> All listings
+  </a>
+
+  <!-- Listing count badge -->
+  <div class="map-count-badge">
+    <i class="fa-solid fa-map-pin"></i>
+    <%= listings.length %> listing<%= listings.length !== 1 ? "s" : "" %>
+  </div>
+
+  <!-- Full-screen map -->
+  <div id="explore-map"></div>
+
+  <!-- Listing card panel (shown when a pin is clicked) -->
+  <div class="map-card-panel" id="mapCardPanel" hidden>
+    <button class="map-card-close" id="mapCardClose" aria-label="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <a class="map-card-link" id="mapCardLink" href="#">
+      <img class="map-card-img" id="mapCardImg" src="" alt="">
+      <div class="map-card-info">
+        <div class="map-card-title"  id="mapCardTitle"></div>
+        <div class="map-card-loc"    id="mapCardLoc"></div>
+        <div class="map-card-bottom">
+          <div class="map-card-rating" id="mapCardRating"></div>
+          <div class="map-card-price"  id="mapCardPrice"></div>
+        </div>
+      </div>
+    </a>
+  </div>
+
+</div>
+
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+<script>
+(function () {
+  mapboxgl.accessToken = '<%- mapboxToken %>';
+
+  const LISTINGS = <%- JSON.stringify(listings.map(l => ({
+    id:          l._id,
+    title:       l.title,
+    location:    l.location,
+    country:     l.country,
+    price:       l.price,
+    image:       (l.image && (l.image.url || l.image)) || "https://shorturl.at/Jp14Z",
+    avgRating:   l.avgRating  || 0,
+    reviewCount: l.reviewCount || 0,
+    coords:      l.geometry.coordinates
+  }))).replace(/</g, '\\u003c').replace(/>/g, '\\u003e') %>;
+
+  const CURRENCY_SYMBOL = '<%- currencySymbol %>';
+  const CURRENCY_CODE   = '<%- currencyCode %>';
+  const CURRENCY_RATE   = <%= currencyRate %>;
+  const CURRENCY_LOCALE = '<%- currencyLocale %>';
+
+  function fmtPrice(p) {
+    return CURRENCY_SYMBOL + Math.round(p * CURRENCY_RATE).toLocaleString(CURRENCY_LOCALE);
+  }
+
+  const map = new mapboxgl.Map({
+    container: 'explore-map',
+    style:     'mapbox://styles/mapbox/streets-v12',
+    center:    [20, 20],
+    zoom:      1.8,
+  });
+
+  map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+
+  // Price pin markers
+  let activePin  = null;
+  const panel    = document.getElementById('mapCardPanel');
+  const closeBtn = document.getElementById('mapCardClose');
+
+  function deactivate() {
+    if (activePin) { activePin.classList.remove('active'); activePin = null; }
+    panel.hidden = true;
+  }
+
+  LISTINGS.forEach(l => {
+    const el = document.createElement('div');
+    el.className = 'map-price-pin';
+    el.textContent = fmtPrice(l.price);
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activePin === el) { deactivate(); return; }
+      if (activePin) activePin.classList.remove('active');
+      activePin = el;
+      el.classList.add('active');
+      showCard(l);
+    });
+
+    new mapboxgl.Marker({ element: el, anchor: 'center' })
+      .setLngLat(l.coords)
+      .addTo(map);
+  });
+
+  // Card panel 
+  function showCard(l) {
+    document.getElementById('mapCardImg').src    = l.image;
+    document.getElementById('mapCardImg').alt    = l.title;
+    document.getElementById('mapCardTitle').textContent = l.title;
+    document.getElementById('mapCardLoc').textContent   = l.location + ', ' + l.country;
+    document.getElementById('mapCardLink').href         = '/listings/' + l.id;
+
+    const ratingEl = document.getElementById('mapCardRating');
+    if (l.reviewCount > 0) {
+      ratingEl.innerHTML = '<i class="fa-solid fa-star"></i> ' + l.avgRating.toFixed(1);
+    } else {
+      ratingEl.innerHTML = '<span class="map-card-new">New</span>';
+    }
+
+    document.getElementById('mapCardPrice').innerHTML =
+      '<strong>' + fmtPrice(l.price) + '</strong> <span>' + CURRENCY_CODE + ' / night</span>';
+
+    panel.hidden = false;
+  }
+
+  closeBtn.addEventListener('click', (e) => { e.stopPropagation(); deactivate(); });
+  map.on('click', deactivate);
+
+})();
+</script>

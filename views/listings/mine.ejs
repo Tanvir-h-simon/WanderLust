@@ -1,0 +1,71 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="listings-page">
+
+    <div class="country-filter-header">
+        <a href="/listings" class="back-to-all">
+            <i class="fa-solid fa-arrow-left"></i> All listings
+        </a>
+        <h2 class="country-filter-title">
+            <i class="fa-solid fa-house" style="font-size:1.3rem; color:#fe424d;"></i>
+            My listings
+        </h2>
+        <p class="country-filter-count">
+            <%= myListings.length %> listing<%= myListings.length !== 1 ? "s" : "" %>
+        </p>
+    </div>
+
+    <% if (myListings.length === 0) { %>
+        <div class="no-results">
+            <i class="fa-solid fa-house"></i>
+            <p>You haven't listed any properties yet.</p>
+            <a href="/listings/new" class="auth-link">List your first property</a>
+        </div>
+    <% } else { %>
+        <div class="listings-grid">
+            <% for (let listing of myListings) { %>
+            <div class="listing-card listing-card-grid">
+                <div class="card-img-wrapper">
+                    <% const imageUrl = (listing.image && (listing.image.url || listing.image)) || "https://shorturl.at/Jp14Z"; %>
+                    <a href="/listings/<%= listing._id %>">
+                        <img src="<%= imageUrl %>" alt="<%= listing.title %>" class="card-img" loading="lazy" />
+                    </a>
+                    <div class="card-actions">
+                        <a href="/listings/<%= listing._id %>/edit" class="card-action-edit" title="Edit">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <form class="card-action-form" method="POST" action="/listings/<%= listing._id %>?_method=DELETE" style="display:inline;">
+                            <button type="submit" class="card-action-delete" title="Delete" onclick="return confirm('Are you sure you want to delete this listing?');">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-body-custom">
+                    <div class="d-flex justify-content-between align-items-start gap-1">
+                        <div class="card-location"><%= listing.title %></div>
+                        <div class="card-rating">
+                            <% if (listing.reviewCount > 0) { %>
+                                <i class="fa-solid fa-star"></i> <%= listing.avgRating.toFixed(1) %>
+                            <% } else { %>
+                                <span class="card-rating-new">New</span>
+                            <% } %>
+                        </div>
+                    </div>
+                    <div class="card-sub"><%= listing.location %>, <%= listing.country %></div>
+                    <%
+                        const mineCurrencySymbol = (currencyPreference && currencyPreference.symbol) ? currencyPreference.symbol : "$";
+                        const mineCurrencyRate   = (currencyPreference && currencyPreference.rate)   ? currencyPreference.rate   : 1;
+                        const mineCurrencyCode   = (currencyPreference && currencyPreference.currency) ? currencyPreference.currency : "USD";
+                        const mineCurrencyLocale = (currencyPreference && currencyPreference.locale)  ? currencyPreference.locale  : "en-US";
+                    %>
+                    <div class="card-price">
+                        <span class="taka-sign"><%= mineCurrencySymbol %></span><%= Math.round((listing.price || 0) * mineCurrencyRate).toLocaleString(mineCurrencyLocale) %> <span class="per-night"><%= mineCurrencyCode %> / night</span>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    <% } %>
+
+</div>

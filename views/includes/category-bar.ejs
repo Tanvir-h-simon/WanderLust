@@ -1,0 +1,147 @@
+<%
+  const categories = [
+    { key: '',            icon: 'fa-solid fa-grip',             label: 'All' },
+    { key: 'beach',       icon: 'fa-solid fa-umbrella-beach',   label: 'Beach' },
+    { key: 'city',        icon: 'fa-solid fa-city',             label: 'City' },
+    { key: 'mountains',   icon: 'fa-solid fa-mountain-sun',     label: 'Mountains' },
+    { key: 'cabins',      icon: 'fa-solid fa-tree',             label: 'Cabins' },
+    { key: 'pools',       icon: 'fa-solid fa-person-swimming',  label: 'Pools' },
+    { key: 'lake',        icon: 'fa-solid fa-sailboat',         label: 'Lakefront' },
+    { key: 'island',      icon: 'fa-solid fa-water',            label: 'Islands' },
+    { key: 'desert',      icon: 'fa-solid fa-sun',              label: 'Desert' },
+    { key: 'rooms',       icon: 'fa-solid fa-door-open',        label: 'Rooms' },
+    { key: 'ski',         icon: 'fa-solid fa-person-skiing',    label: 'Skiing' },
+    { key: 'countryside', icon: 'fa-solid fa-leaf',             label: 'Countryside' },
+  ];
+%>
+<div class="category-bar">
+
+  <!-- Scrollable category icons -->
+  <div class="category-bar-scroll">
+    <% categories.forEach(cat => { %>
+      <a href="/listings<%= cat.key ? '?category=' + cat.key : '' %>"
+         class="category-item<%= activeCategory === cat.key ? ' active' : '' %>">
+        <i class="<%= cat.icon %>"></i>
+        <span><%= cat.label %></span>
+      </a>
+    <% }); %>
+  </div>
+
+  <!-- Fixed right controls -->
+  <div class="category-bar-controls">
+    <a class="cat-map-btn" id="catMapBtn" href="/listings/map">
+      <i class="fa-solid fa-map"></i>
+      Show map
+    </a>
+
+    <button class="cat-filter-btn" id="catFilterBtn" type="button">
+      <i class="fa-solid fa-sliders"></i>
+      Filters
+    </button>
+
+    <label class="cat-toggle-wrap" id="taxToggleWrap" title="Display total before taxes">
+      <span class="cat-toggle-label">Display total<br>before taxes</span>
+      <span class="cat-toggle-track" id="catToggleTrack">
+        <span class="cat-toggle-thumb"></span>
+      </span>
+      <input type="checkbox" id="taxToggle" class="cat-toggle-input" aria-label="Display total before taxes">
+    </label>
+  </div>
+
+</div>
+
+<!-- Filter modal (basic) -->
+<div class="filter-modal-backdrop" id="filterBackdrop">
+  <div class="filter-modal" id="filterModal" role="dialog" aria-modal="true">
+    <div class="filter-modal-header">
+      <button class="filter-modal-close" id="filterClose" aria-label="Close filters">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <h2 class="filter-modal-title">Filters</h2>
+    </div>
+
+    <div class="filter-modal-body">
+      <form action="/listings" method="GET" id="filterForm">
+
+        <!-- Price range -->
+        <div class="filter-section">
+          <h3 class="filter-section-title">Price range</h3>
+          <p class="filter-section-sub">Per night before taxes</p>
+          <div class="filter-price-row">
+            <div class="filter-price-input-wrap">
+              <label class="filter-price-label">Min price</label>
+              <div class="filter-price-field">
+                <span class="filter-price-sign">৳</span>
+                <input type="number" name="minPrice" class="filter-price-input"
+                       placeholder="0" min="0">
+              </div>
+            </div>
+            <div class="filter-price-sep">–</div>
+            <div class="filter-price-input-wrap">
+              <label class="filter-price-label">Max price</label>
+              <div class="filter-price-field">
+                <span class="filter-price-sign">৳</span>
+                <input type="number" name="maxPrice" class="filter-price-input"
+                       placeholder="Any" min="0">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Country -->
+        <div class="filter-section">
+          <h3 class="filter-section-title">Country</h3>
+          <input type="text" name="country" class="filter-text-input"
+                 placeholder="e.g. France, Japan…">
+        </div>
+
+      </form>
+    </div>
+
+    <div class="filter-modal-footer">
+      <a href="/listings" class="filter-clear-btn">Clear all</a>
+      <button type="submit" form="filterForm" class="filter-apply-btn">Show results</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    /* Filter modal */
+    const filterBtn     = document.getElementById('catFilterBtn');
+    const backdrop      = document.getElementById('filterBackdrop');
+    const closeBtn      = document.getElementById('filterClose');
+
+    if (filterBtn) {
+      filterBtn.addEventListener('click', () => backdrop.classList.add('open'));
+      closeBtn.addEventListener('click',  () => backdrop.classList.remove('open'));
+      backdrop.addEventListener('click',  (e) => {
+        if (e.target === backdrop) backdrop.classList.remove('open');
+      });
+    }
+
+    /* Map button */
+    const mapBtn = document.getElementById('catMapBtn');
+    if (mapBtn) {
+      const qs = window.location.search;
+      if (qs) mapBtn.href = '/listings/map' + qs;
+    }
+
+    /* Tax toggle */
+    const toggle = document.getElementById('taxToggle');
+    const track  = document.getElementById('catToggleTrack');
+
+    if (toggle) {
+      const stored = localStorage.getItem('wl-show-pretax') === 'true';
+      toggle.checked = stored;
+      track.classList.toggle('on', stored);
+      document.body.classList.toggle('show-taxes', stored);
+
+      toggle.addEventListener('change', () => {
+        track.classList.toggle('on', toggle.checked);
+        document.body.classList.toggle('show-taxes', toggle.checked);
+        localStorage.setItem('wl-show-pretax', toggle.checked);
+      });
+    }
+  })();
+</script>

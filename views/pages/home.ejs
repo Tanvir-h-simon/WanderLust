@@ -1,36 +1,17 @@
 <% layout("/layouts/boilerplate") %>
 
-<!-- Hero Section with Search Bar -->
-<div class="hero-section">
-    <div class="hero-content">
-        <form class="search-bar" action="/listings" method="GET">
-            <div class="search-group where-group">
-                <label for="where">Where</label>
-                <input type="text" id="where" name="location" placeholder="Search destinations" class="search-input">
-            </div>
-            
-            <div class="search-group when-group">
-                <label for="when">When</label>
-                <input type="date" id="when" name="date" class="search-input">
-            </div>
-            
-            <div class="search-group who-group">
-                <label for="who">Who</label>
-                <input type="text" id="who" name="guests" placeholder="Add guests" class="search-input">
-            </div>
-            
-            <button type="submit" class="search-btn">
-                <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
-        </form>
-    </div>
-</div>
+<%
+    const currencyCode = (currencyPreference && currencyPreference.currency) ? currencyPreference.currency : "USD";
+    const currencySymbol = (currencyPreference && currencyPreference.symbol) ? currencyPreference.symbol : "$";
+    const currencyRate = (currencyPreference && currencyPreference.rate) ? currencyPreference.rate : 1;
+    const currencyLocale = (currencyPreference && currencyPreference.locale) ? currencyPreference.locale : "en-US";
+%>
 
 <!-- Featured Listings -->
 <div class="container featured-container">
     <h2 class="featured-heading">Featured Listings</h2>
     <p class="featured-subtext">Check out some of our best destinations</p>
-    
+
     <div class="featured-listings">
         <% if (featuredListings && featuredListings.length > 0) { %>
             <% featuredListings.forEach((item) => { %>
@@ -48,7 +29,7 @@
                             <i class="fa-solid fa-location-dot"></i> <%= item.location %>, <%= item.country %>
                         </p>
                         <p class="featured-price">
-                            <span class="taka-sign">৳</span><%= item.price.toLocaleString("en-BD") %> <span class="per-night">/ night</span>
+                            <span class="taka-sign"><%= currencySymbol %></span><%= Math.round((item.price || 0) * currencyRate).toLocaleString(currencyLocale) %> <span class="per-night"><%= currencyCode %> / night</span>
                         </p>
                     </div>
                 </div>
@@ -57,7 +38,7 @@
             <p class="no-listings">No featured listings available</p>
         <% } %>
     </div>
-    
+
     <div class="view-all-container">
         <a href="/listings" class="view-all-btn">View All Listings</a>
     </div>

@@ -1,30 +1,364 @@
-<nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/"><i class="fa-regular fa-compass"></i></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav navbar-nav-centered">
-        <li class="nav-item">
-          <a class="nav-link" aria-current="page" href="/">
-            <i class="fa-solid fa-home"></i>
-            <span>Home</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/listings">
-            <i class="fa-solid fa-list"></i>
-            <span>All listings</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/listings/new">
-            <i class="fa-solid fa-plus-circle"></i>
-            <span>Add new listing</span>
-          </a>
-        </li>
-      </ul>
+<nav class="wl-navbar sticky-top">
+  <div class="wl-navbar-inner">
+
+    <!-- Logo -->
+    <a href="/" class="wl-brand">
+      <i class="fa-solid fa-compass"></i>
+      <span class="wl-brand-text">Wander<span class="wl-brand-accent">Lust</span></span>
+    </a>
+
+    <!-- Pill Search -->
+    <form class="wl-search-pill" action="/listings" method="GET" id="wlSearchForm">
+
+      <div class="wl-pill-group" id="wlPillWhere">
+        <span class="wl-pill-label">Where</span>
+        <input class="wl-pill-input" type="text" name="location"
+               placeholder="Anywhere" autocomplete="off" id="wlWhereInput">
+      </div>
+
+      <!-- Where suggestions -->
+      <div class="wl-where-suggestions" id="wlWhereSuggestions" hidden>
+        <p class="wl-sugg-heading">Suggested destinations</p>
+        <ul class="wl-sugg-list" id="wlSuggList"></ul>
+      </div>
+
+      <div class="wl-pill-sep"></div>
+
+      <div class="wl-pill-group" id="wlPillWhen" tabindex="0" role="button" aria-haspopup="true">
+        <span class="wl-pill-label">When</span>
+        <span class="wl-pill-value" id="wlWhenDisplay">Any week</span>
+      </div>
+
+      <div class="wl-pill-sep"></div>
+
+      <div class="wl-pill-group wl-pill-group-last" id="wlPillWho">
+        <div class="wl-pill-who-content">
+          <div class="wl-pill-who-text" id="wlWhoTrigger" tabindex="0" role="button" aria-haspopup="true">
+            <span class="wl-pill-label">Who</span>
+            <span class="wl-pill-value" id="wlWhoDisplay">Add guests</span>
+          </div>
+          <button type="submit" class="wl-pill-btn" aria-label="Search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span class="wl-pill-btn-text">Search</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- When popover -->
+      <div class="wl-popover wl-popover-when" id="wlWhenPopover" hidden>
+        <div class="wl-popover-title">Choose your dates</div>
+        <div class="wl-date-row">
+          <label class="wl-date-field">
+            <span class="wl-date-label">Check-in</span>
+            <input type="date" name="checkin" id="wlCheckin">
+          </label>
+          <label class="wl-date-field">
+            <span class="wl-date-label">Check-out</span>
+            <input type="date" name="checkout" id="wlCheckout">
+          </label>
+        </div>
+        <div class="wl-popover-actions">
+          <button type="button" class="wl-popover-clear" id="wlWhenClear">Clear dates</button>
+        </div>
+      </div>
+
+      <!-- Who popover -->
+      <div class="wl-popover wl-popover-who" id="wlWhoPopover" hidden>
+        <div class="wl-stepper-row">
+          <div class="wl-stepper-text">
+            <div class="wl-stepper-title">Adults</div>
+            <div class="wl-stepper-sub">Ages 13 or above</div>
+          </div>
+          <div class="wl-stepper-controls">
+            <button type="button" class="wl-stepper-btn" data-target="adults" data-dir="-1" aria-label="Decrease adults">&minus;</button>
+            <span class="wl-stepper-count" data-count="adults">0</span>
+            <button type="button" class="wl-stepper-btn" data-target="adults" data-dir="1" aria-label="Increase adults">+</button>
+          </div>
+        </div>
+        <div class="wl-stepper-row">
+          <div class="wl-stepper-text">
+            <div class="wl-stepper-title">Children</div>
+            <div class="wl-stepper-sub">Ages 2 &ndash; 12</div>
+          </div>
+          <div class="wl-stepper-controls">
+            <button type="button" class="wl-stepper-btn" data-target="children" data-dir="-1" aria-label="Decrease children">&minus;</button>
+            <span class="wl-stepper-count" data-count="children">0</span>
+            <button type="button" class="wl-stepper-btn" data-target="children" data-dir="1" aria-label="Increase children">+</button>
+          </div>
+        </div>
+        <div class="wl-popover-actions">
+          <button type="button" class="wl-popover-clear" id="wlWhoClear">Clear guests</button>
+        </div>
+        <input type="hidden" name="guests" id="wlGuestsInput">
+      </div>
+
+    </form>
+
+    <!-- Right actions -->
+    <div class="wl-nav-right">
+      <% if (currentUser) { %>
+        <a href="/listings/new" class="wl-host-link">WanderLust your home</a>
+      <% } else { %>
+        <a href="/listings/new" class="wl-host-link">Become a host</a>
+      <% } %>
+
+      <div class="wl-globe-wrap" id="wlGlobeWrap">
+        <button class="wl-globe-btn" id="wlGlobeBtn" type="button" aria-label="Language and region">
+          <i class="fa-solid fa-globe"></i>
+        </button>
+        <div class="wl-currency-dropdown" id="wlCurrencyDropdown" aria-hidden="true">
+          <div class="wl-currency-title">Currency</div>
+          <% const currencies = [
+            { code: "USD", label: "US Dollar", symbol: "$" },
+            { code: "BDT", label: "Bangladeshi Taka", symbol: "৳" }
+          ];
+          const activeCurrency = (currencyPreference && currencyPreference.currency) ? currencyPreference.currency : "USD";
+          %>
+          <% for (let c of currencies) { %>
+          <form method="POST" action="/preferences/currency" class="wl-currency-form">
+            <input type="hidden" name="currency" value="<%= c.code %>">
+            <button type="submit" class="wl-currency-option <%= activeCurrency === c.code ? 'wl-currency-active' : '' %>">
+              <span class="wl-currency-symbol"><%= c.symbol %></span>
+              <span class="wl-currency-info">
+                <span class="wl-currency-code"><%= c.code %></span>
+                <span class="wl-currency-label"><%= c.label %></span>
+              </span>
+              <% if (activeCurrency === c.code) { %>
+                <i class="fa-solid fa-check wl-currency-check"></i>
+              <% } %>
+            </button>
+          </form>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="wl-user-wrap" id="wlUserWrap">
+        <button class="wl-user-btn" id="wlUserBtn" type="button" aria-label="User menu">
+          <i class="fa-solid fa-bars"></i>
+          <div class="wl-avatar">
+            <% if (currentUser) { %>
+              <span class="wl-avatar-initials">
+                <%= currentUser.username.substring(0, 1).toUpperCase() %>
+              </span>
+            <% } else { %>
+              <i class="fa-solid fa-circle-user"></i>
+            <% } %>
+          </div>
+        </button>
+
+        <div class="wl-dropdown" id="wlDropdown" aria-hidden="true">
+          <% if (currentUser) { %>
+            <div class="wl-dropdown-user">
+              <i class="fa-solid fa-circle-user"></i>
+              <%= currentUser.username %>
+            </div>
+            <div class="wl-dropdown-hr"></div>
+            <a href="/listings"      class="wl-dropdown-item">All listings</a>
+            <a href="/listings/mine" class="wl-dropdown-item">My listings</a>
+            <a href="/listings/new"  class="wl-dropdown-item">List your property</a>
+            <div class="wl-dropdown-hr"></div>
+            <a href="/logout" class="wl-dropdown-item">Log out</a>
+          <% } else { %>
+            <a href="/signup" class="wl-dropdown-item wl-dropdown-item-bold">Sign up</a>
+            <a href="/login"  class="wl-dropdown-item">Log in</a>
+            <div class="wl-dropdown-hr"></div>
+            <a href="/listings"     class="wl-dropdown-item">All listings</a>
+            <a href="/listings/new" class="wl-dropdown-item">Become a host</a>
+          <% } %>
+        </div>
+      </div>
     </div>
+
   </div>
 </nav>
+
+<script>
+  (function () {
+    /* Globe / currency dropdown */
+    const globeBtn  = document.getElementById('wlGlobeBtn');
+    const globeWrap = document.getElementById('wlGlobeWrap');
+    const currDrop  = document.getElementById('wlCurrencyDropdown');
+
+    globeBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const open = globeWrap.classList.toggle('wl-globe-open');
+      currDrop.setAttribute('aria-hidden', String(!open));
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!globeWrap.contains(e.target)) {
+        globeWrap.classList.remove('wl-globe-open');
+        currDrop.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    /* User dropdown */
+    const btn      = document.getElementById('wlUserBtn');
+    const dropdown = document.getElementById('wlDropdown');
+    const wrap     = document.getElementById('wlUserWrap');
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      const open = wrap.classList.toggle('wl-user-open');
+      dropdown.setAttribute('aria-hidden', String(!open));
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!wrap.contains(e.target)) {
+        wrap.classList.remove('wl-user-open');
+        dropdown.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    /* Pill active highlight */
+    document.querySelectorAll('.wl-pill-group').forEach(group => {
+      group.addEventListener('focusin', () => {
+        document.querySelectorAll('.wl-pill-group').forEach(g => g.classList.remove('wl-pill-active'));
+        group.classList.add('wl-pill-active');
+      });
+    });
+
+    /* When / Who popovers */
+    const whereGroup = document.getElementById('wlPillWhere');
+    const whenGroup  = document.getElementById('wlPillWhen');
+    const whoTrigger = document.getElementById('wlWhoTrigger');
+    const whenPop    = document.getElementById('wlWhenPopover');
+    const whoPop     = document.getElementById('wlWhoPopover');
+
+    /* Where suggestions */
+    const whereInput = document.getElementById('wlWhereInput');
+    const suggBox    = document.getElementById('wlWhereSuggestions');
+    const suggList   = document.getElementById('wlSuggList');
+
+    const DESTINATIONS = [
+      { code: 'MX', label: 'Mexico',         sub: 'Beautiful beaches & culture' },
+      { code: 'CH', label: 'Switzerland',     sub: 'Stunning Alpine scenery' },
+      { code: 'TZ', label: 'Tanzania',        sub: 'Incredible wildlife safaris' },
+      { code: 'NL', label: 'Netherlands',     sub: 'Iconic canals & tulip fields' },
+      { code: 'JP', label: 'Japan',           sub: 'Cherry blossoms & temples' },
+      { code: 'FR', label: 'France',          sub: 'For sights like Eiffel Tower' },
+      { code: 'MV', label: 'Maldives',        sub: 'Paradise island getaways' },
+      { code: 'IN', label: 'India',           sub: 'Rich history & culture' },
+      { code: 'ID', label: 'Bali, Indonesia', sub: 'Tropical paradise vibes' },
+      { code: 'US', label: 'New York',        sub: 'The city that never sleeps' },
+    ];
+
+    function countryFlag(code) {
+      return code.toUpperCase().split('').map(c =>
+        String.fromCodePoint(c.charCodeAt(0) - 65 + 0x1F1E6)
+      ).join('');
+    }
+
+    function renderSuggestions(query) {
+      const q = (query || '').trim().toLowerCase();
+      const matches = q
+        ? DESTINATIONS.filter(d => d.label.toLowerCase().includes(q) || d.sub.toLowerCase().includes(q))
+        : DESTINATIONS;
+
+      suggList.innerHTML = '';
+      if (matches.length === 0) { suggBox.hidden = true; return; }
+
+      matches.forEach(d => {
+        const li = document.createElement('li');
+        li.className = 'wl-sugg-item';
+        li.innerHTML =
+          `<span class="wl-sugg-icon">${countryFlag(d.code)}</span>` +
+          `<span class="wl-sugg-text">` +
+            `<span class="wl-sugg-label">${d.label}</span>` +
+            `<span class="wl-sugg-sub">${d.sub}</span>` +
+          `</span>`;
+        li.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          whereInput.value = d.label;
+          suggBox.hidden = true;
+        });
+        suggList.appendChild(li);
+      });
+      suggBox.hidden = false;
+    }
+
+    if (whereInput) {
+      whereInput.addEventListener('focus', () => renderSuggestions(whereInput.value));
+      whereInput.addEventListener('input', () => renderSuggestions(whereInput.value));
+      whereInput.addEventListener('blur',  () => setTimeout(() => { suggBox.hidden = true; }, 150));
+    }
+
+    function closePops() {
+      if (whenPop)  whenPop.hidden  = true;
+      if (whoPop)   whoPop.hidden   = true;
+      if (suggBox)  suggBox.hidden  = true;
+    }
+    function togglePop(pop) {
+      const willOpen = pop.hidden;
+      closePops();
+      pop.hidden = !willOpen;
+    }
+
+    if (whenGroup)  whenGroup.addEventListener('click',  (e) => { e.stopPropagation(); togglePop(whenPop); });
+    if (whoTrigger) whoTrigger.addEventListener('click', (e) => { e.stopPropagation(); togglePop(whoPop); });
+    if (whereGroup) whereGroup.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (whenPop) whenPop.hidden = true;
+      if (whoPop)  whoPop.hidden  = true;
+    });
+
+    [whenPop, whoPop].forEach(p => p && p.addEventListener('click', (e) => e.stopPropagation()));
+
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.wl-search-pill')) {
+        document.querySelectorAll('.wl-pill-group').forEach(g => g.classList.remove('wl-pill-active'));
+        closePops();
+      }
+    });
+
+    /* Dates */
+    const checkin     = document.getElementById('wlCheckin');
+    const checkout    = document.getElementById('wlCheckout');
+    const whenDisplay = document.getElementById('wlWhenDisplay');
+
+    const fmt = (v) => {
+      if (!v) return null;
+      const d = new Date(v + 'T00:00:00');
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    };
+    function updateWhen() {
+      const a = fmt(checkin.value), b = fmt(checkout.value);
+      if (a && b)      whenDisplay.textContent = a + ' – ' + b;
+      else if (a)      whenDisplay.textContent = a + ' – ?';
+      else             whenDisplay.textContent = 'Any week';
+    }
+    const today = new Date().toISOString().split('T')[0];
+    if (checkin)  checkin.min = today;
+    if (checkin)  checkin.addEventListener('change', () => {
+      if (checkin.value) { checkout.min = checkin.value; if (checkout.value && checkout.value < checkin.value) checkout.value = ''; }
+      updateWhen();
+    });
+    if (checkout) checkout.addEventListener('change', updateWhen);
+    const whenClear = document.getElementById('wlWhenClear');
+    if (whenClear) whenClear.addEventListener('click', () => { checkin.value = ''; checkout.value = ''; updateWhen(); });
+
+    /* Guests */
+    const counts       = { adults: 0, children: 0 };
+    const guestsInput  = document.getElementById('wlGuestsInput');
+    const whoDisplay   = document.getElementById('wlWhoDisplay');
+
+    function updateWho() {
+      const total = counts.adults + counts.children;
+      guestsInput.value = total > 0 ? total : '';
+      whoDisplay.textContent = total > 0 ? total + ' guest' + (total !== 1 ? 's' : '') : 'Add guests';
+      document.querySelectorAll('.wl-stepper-count').forEach(el => {
+        el.textContent = counts[el.dataset.count];
+      });
+    }
+    document.querySelectorAll('.wl-stepper-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        const t = b.dataset.target;
+        const dir = parseInt(b.dataset.dir, 10);
+        counts[t] = Math.max(0, Math.min(16, counts[t] + dir));
+        updateWho();
+      });
+    });
+    const whoClear = document.getElementById('wlWhoClear');
+    if (whoClear) whoClear.addEventListener('click', () => { counts.adults = 0; counts.children = 0; updateWho(); });
+  })();
+</script>

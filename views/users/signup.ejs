@@ -1,0 +1,132 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo">
+                <i class="fa-regular fa-compass"></i>
+            </div>
+            <h2 class="auth-title">Create your account</h2>
+            <p class="auth-subtitle">Join WanderLust and start exploring</p>
+        </div>
+
+        <form action="/signup" method="POST" class="auth-form" id="signupForm" novalidate>
+            <div class="auth-field">
+                <label for="username" class="auth-label">
+                    <i class="fa-solid fa-user"></i> Username
+                </label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    class="auth-input"
+                    placeholder="Choose a username"
+                    required
+                    autocomplete="username"
+                />
+            </div>
+
+            <div class="auth-field">
+                <label for="email" class="auth-label">
+                    <i class="fa-solid fa-envelope"></i> Email
+                </label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    class="auth-input"
+                    placeholder="your@email.com"
+                    required
+                    autocomplete="email"
+                />
+            </div>
+
+            <div class="auth-field">
+                <label for="password" class="auth-label">
+                    <i class="fa-solid fa-lock"></i> Password
+                </label>
+                <div class="auth-input-group">
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="auth-input"
+                        placeholder="Create a password"
+                        required
+                        autocomplete="new-password"
+                    />
+                    <button type="button" class="toggle-password" onclick="togglePassword('password', this)" tabindex="-1">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+
+                <ul class="pwd-rules" id="pwdRules">
+                    <li class="pwd-rule" id="rule-length">
+                        <i class="fa-solid fa-circle-xmark"></i> At least 8 characters
+                    </li>
+                    <li class="pwd-rule" id="rule-max">
+                        <i class="fa-solid fa-circle-check"></i> No more than 128 characters
+                    </li>
+                    <li class="pwd-rule" id="rule-numOrPunct">
+                        <i class="fa-solid fa-circle-xmark"></i> Contains a number or punctuation
+                    </li>
+                </ul>
+            </div>
+
+            <button type="submit" class="auth-btn" id="submitBtn">
+                Create Account
+            </button>
+        </form>
+
+        <p class="auth-switch">
+            Already have an account?
+            <a href="/login" class="auth-link">Log in</a>
+        </p>
+    </div>
+</div>
+
+<script>
+    function togglePassword(fieldId, btn) {
+        const input = document.getElementById(fieldId);
+        const icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fa-solid fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fa-solid fa-eye';
+        }
+    }
+
+    const pwdInput   = document.getElementById('password');
+    const ruleLength = document.getElementById('rule-length');
+    const ruleMax    = document.getElementById('rule-max');
+    const ruleNumPunct = document.getElementById('rule-numOrPunct');
+    const submitBtn  = document.getElementById('submitBtn');
+
+    function setRule(el, pass) {
+        const icon = el.querySelector('i');
+        el.classList.toggle('pwd-rule-pass', pass);
+        el.classList.toggle('pwd-rule-fail', !pass);
+        icon.className = pass ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-xmark';
+    }
+
+    function validate(val) {
+        const okLength   = val.length >= 8;
+        const okMax      = val.length <= 128;
+        const okNumPunct = /[0-9]/.test(val) || /[^a-zA-Z0-9]/.test(val);
+        setRule(ruleLength,   okLength);
+        setRule(ruleMax,      okMax);
+        setRule(ruleNumPunct, okNumPunct);
+        submitBtn.disabled = !(okLength && okMax && okNumPunct);
+    }
+
+    pwdInput.addEventListener('input', () => validate(pwdInput.value));
+
+    document.getElementById('signupForm').addEventListener('submit', (e) => {
+        const val = pwdInput.value;
+        const ok  = val.length >= 8 && val.length <= 128 &&
+                    (/[0-9]/.test(val) || /[^a-zA-Z0-9]/.test(val));
+        if (!ok) e.preventDefault();
+    });
+</script>
