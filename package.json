@@ -14,6 +14,9 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs",
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "@mapbox/mapbox-sdk": "^0.16.2",
     "cloudinary": "^2.10.0",
