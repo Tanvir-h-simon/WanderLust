@@ -136,7 +136,9 @@
         <button class="wl-user-btn" id="wlUserBtn" type="button" aria-label="User menu">
           <i class="fa-solid fa-bars"></i>
           <div class="wl-avatar">
-            <% if (currentUser) { %>
+            <% if (currentUser && currentUser.role === 'admin') { %>
+              <i class="fa-solid fa-shield-halved" style="font-size:1rem; color:#e94560;"></i>
+            <% } else if (currentUser) { %>
               <span class="wl-avatar-initials">
                 <%= currentUser.username.substring(0, 1).toUpperCase() %>
               </span>
@@ -147,7 +149,18 @@
         </button>
 
         <div class="wl-dropdown" id="wlDropdown" aria-hidden="true">
-          <% if (currentUser) { %>
+          <% if (currentUser && currentUser.role === 'admin') { %>
+            <div class="wl-dropdown-user" style="color: #e94560;">
+              <i class="fa-solid fa-shield-halved"></i>
+              <%= currentUser.username %> <span style="font-size:0.7rem; background:#e94560; color:#fff; padding:1px 6px; border-radius:99px; margin-left:4px;">ADMIN</span>
+            </div>
+            <div class="wl-dropdown-hr"></div>
+            <a href="/listings"           class="wl-dropdown-item">All listings</a>
+            <a href="/listings/new"        class="wl-dropdown-item">Add new listing</a>
+            <a href="/admin/audit-log"     class="wl-dropdown-item"><i class="fa-solid fa-clipboard-list" style="width:14px;"></i> Audit log</a>
+            <div class="wl-dropdown-hr"></div>
+            <a href="/logout" class="wl-dropdown-item">Log out</a>
+          <% } else if (currentUser) { %>
             <div class="wl-dropdown-user">
               <i class="fa-solid fa-circle-user"></i>
               <%= currentUser.username %>

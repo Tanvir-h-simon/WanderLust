@@ -17,4 +17,11 @@ router.post("/login",
 
 router.get("/logout",  controller.logout);
 
+router.get("/admin/login",  controller.renderAdminLogin);
+router.post("/admin/login",
+    saveRedirectUrl,
+    passport.authenticate("local", { failureFlash: true, failureRedirect: "/admin/login" }),
+    controller.adminLogin
+);
+
 module.exports = router;

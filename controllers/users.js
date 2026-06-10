@@ -53,3 +53,22 @@ module.exports.logout = (req, res, next) => {
         res.redirect("/");
     });
 };
+
+module.exports.renderAdminLogin = (req, res) => {
+    if (req.isAuthenticated() && req.user.role === 'admin') return res.redirect("/listings");
+    if (req.isAuthenticated()) return res.redirect("/listings");
+    res.render("users/admin-login.ejs");
+};
+
+module.exports.adminLogin = (req, res, next) => {
+    if (req.user.role !== 'admin') {
+        req.logout((err) => {
+            if (err) return next(err);
+            req.flash("error", "Access denied. Admin credentials required.");
+            res.redirect("/admin/login");
+        });
+        return;
+    }
+    req.flash("success", `Welcome, Admin ${req.user.username}!`);
+    res.redirect("/listings");
+};

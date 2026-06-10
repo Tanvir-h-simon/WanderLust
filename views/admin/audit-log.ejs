@@ -1,0 +1,125 @@
+<% layout("/layouts/boilerplate") %>
+
+<%
+const ACTION_LABELS = {
+    "listing.created": { label: "Listing Created", color: "#22c55e" },
+    "listing.updated": { label: "Listing Updated", color: "#f59e0b" },
+    "listing.deleted": { label: "Listing Deleted", color: "#ef4444" },
+    "review.deleted":  { label: "Review Deleted",  color: "#8b5cf6" }
+};
+function fmt(date) {
+    return new Date(date).toLocaleString("en-US", {
+        year: "numeric", month: "short", day: "numeric",
+        hour: "2-digit", minute: "2-digit"
+    });
+}
+%>
+
+<div class="container" style="max-width: 1100px; padding: 2rem 1rem;">
+
+    <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+        <div style="background:linear-gradient(135deg,#1a1a2e,#e94560); color:#fff; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+            <h1 style="margin:0; font-size:1.5rem; font-weight:700;">Admin Audit Log</h1>
+            <p style="margin:0; color:#666; font-size:0.875rem;"><%= total %> total action<%= total !== 1 ? "s" : "" %> recorded</p>
+        </div>
+    </div>
+
+    <%# Filter bar %>
+    <form method="GET" action="/admin/audit-log" style="display:flex; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+        <select name="action" style="border:1px solid #ddd; border-radius:8px; padding:0.4rem 0.75rem; font-size:0.875rem;">
+            <option value="">All actions</option>
+            <option value="listing.created" <%- actionFilter === "listing.created" ? "selected" : "" %>>Listing Created</option>
+            <option value="listing.updated" <%- actionFilter === "listing.updated" ? "selected" : "" %>>Listing Updated</option>
+            <option value="listing.deleted" <%- actionFilter === "listing.deleted" ? "selected" : "" %>>Listing Deleted</option>
+            <option value="review.deleted"  <%- actionFilter === "review.deleted"  ? "selected" : "" %>>Review Deleted</option>
+        </select>
+        <button type="submit" style="background:#1a1a2e; color:#fff; border:none; border-radius:8px; padding:0.4rem 1rem; cursor:pointer; font-size:0.875rem;">Filter</button>
+        <% if (actionFilter) { %>
+            <a href="/admin/audit-log" style="border:1px solid #ddd; border-radius:8px; padding:0.4rem 0.75rem; font-size:0.875rem; text-decoration:none; color:#666;">Clear</a>
+        <% } %>
+    </form>
+
+    <% if (logs.length === 0) { %>
+        <div style="text-align:center; padding:4rem 0; color:#999;">
+            <i class="fa-solid fa-clipboard-list" style="font-size:2.5rem; margin-bottom:1rem; display:block;"></i>
+            <p>No admin actions recorded yet.</p>
+        </div>
+    <% } else { %>
+
+    <div style="background:#fff; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.875rem;">
+            <thead>
+                <tr style="background:#f9fafb; border-bottom:1px solid #e5e7eb;">
+                    <th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:#374151;">Timestamp</th>
+                    <th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:#374151;">Action</th>
+                    <th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:#374151;">Target</th>
+                    <th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:#374151;">Details</th>
+                    <th style="padding:0.75rem 1rem; text-align:left; font-weight:600; color:#374151;">IP</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% logs.forEach((log, i) => { %>
+                <% const meta = ACTION_LABELS[log.action] || { label: log.action, color: "#6b7280" }; %>
+                <tr style="border-bottom:1px solid #f3f4f6; background:<%= i % 2 === 0 ? '#fff' : '#fafafa' %>;">
+                    <td style="padding:0.75rem 1rem; color:#6b7280; white-space:nowrap;">
+                        <%= fmt(log.createdAt) %>
+                    </td>
+                    <td style="padding:0.75rem 1rem;">
+                        <span style="background:<%= meta.color %>1a; color:<%= meta.color %>; border:1px solid <%= meta.color %>33; padding:2px 8px; border-radius:99px; font-size:0.75rem; font-weight:600; white-space:nowrap;">
+                            <%= meta.label %>
+                        </span>
+                    </td>
+                    <td style="padding:0.75rem 1rem; max-width:220px;">
+                        <div style="font-weight:500; color:#111; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="<%= log.targetTitle || '' %>">
+                            <%= log.targetTitle || "—" %>
+                        </div>
+                        <div style="font-size:0.75rem; color:#9ca3af; font-family:monospace;">
+                            <%= log.targetId ? log.targetId.toString().slice(-8) : "" %>
+                        </div>
+                    </td>
+                    <td style="padding:0.75rem 1rem; color:#6b7280; max-width:220px;">
+                        <% if (log.metadata && Object.keys(log.metadata).length > 0) { %>
+                            <% if (log.metadata.fields) { %>
+                                <span style="font-size:0.75rem;">Fields: <%= log.metadata.fields.join(", ") %></span>
+                            <% } else if (log.metadata.reviewAuthor) { %>
+                                <span style="font-size:0.75rem;">By <strong><%= log.metadata.reviewAuthor %></strong> · ⭐ <%= log.metadata.rating %></span>
+                            <% } else if (log.metadata.location) { %>
+                                <span style="font-size:0.75rem;"><%= log.metadata.location %>, <%= log.metadata.country %></span>
+                            <% } %>
+                        <% } else { %>
+                            <span style="color:#d1d5db;">—</span>
+                        <% } %>
+                    </td>
+                    <td style="padding:0.75rem 1rem; color:#9ca3af; font-size:0.75rem; font-family:monospace;">
+                        <%= log.ip || "—" %>
+                    </td>
+                </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+    <%# Pagination %>
+    <% if (totalPages > 1) { %>
+    <div style="display:flex; justify-content:center; align-items:center; gap:0.5rem; margin-top:1.5rem;">
+        <% if (page > 1) { %>
+            <a href="/admin/audit-log?page=<%= page - 1 %><%= actionFilter ? '&action=' + actionFilter : '' %>"
+               style="border:1px solid #ddd; border-radius:8px; padding:0.4rem 0.75rem; text-decoration:none; color:#374151; font-size:0.875rem;">
+               &larr; Prev
+            </a>
+        <% } %>
+        <span style="font-size:0.875rem; color:#6b7280;">Page <%= page %> of <%= totalPages %></span>
+        <% if (page < totalPages) { %>
+            <a href="/admin/audit-log?page=<%= page + 1 %><%= actionFilter ? '&action=' + actionFilter : '' %>"
+               style="border:1px solid #ddd; border-radius:8px; padding:0.4rem 0.75rem; text-decoration:none; color:#374151; font-size:0.875rem;">
+               Next &rarr;
+            </a>
+        <% } %>
+    </div>
+    <% } %>
+
+    <% } %>
+</div>

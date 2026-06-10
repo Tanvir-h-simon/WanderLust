@@ -1,6 +1,7 @@
 const Listing      = require("../models/listing");
 const Review       = require("../models/reviews");
 const ExpressError = require("../utils/expressError");
+const { logAction } = require("../utils/auditLogger");
 
 async function syncListingRating(listingId) {
     const listing = await Listing.findById(listingId).populate("reviews", "rating");
@@ -34,9 +35,19 @@ module.exports.create = async (req, res) => {
 
 module.exports.destroy = async (req, res) => {
     const { id, reviewId } = req.params;
+    const review = await Review.findById(reviewId).populate("user", "username");
     await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
     await Review.findByIdAndDelete(reviewId);
     await syncListingRating(id);
+
+    if (review) {
+        const listing = await Listing.findById(id).select("title");
+        await logAction(req, "review.deleted", "Review", review._id, `Review on "${listing?.title || id}"`, {
+            reviewAuthor: review.user?.username,
+            rating: review.rating,
+            comment: review.comment?.substring(0, 100)
+        });
+    }
 
     req.flash("success", "Review deleted.");
     res.redirect(`/listings/${id}`);

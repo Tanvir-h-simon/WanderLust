@@ -3,6 +3,7 @@ const User         = require("../models/user");
 const ExpressError = require("../utils/expressError");
 const { cloudinary } = require("../cloudConfig");
 const { geocode }  = require("../utils/geocoder");
+const { logAction } = require("../utils/auditLogger");
 
 function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -152,6 +153,7 @@ module.exports.create = async (req, res) => {
         geometry
     });
     await newListing.save();
+    await logAction(req, "listing.created", "Listing", newListing._id, newListing.title);
     req.flash("success", "New listing created successfully!");
     res.redirect("/listings");
 };
@@ -191,6 +193,7 @@ module.exports.update = async (req, res) => {
     const updatedListing = await Listing.findByIdAndUpdate(id, updateData, { new: true });
 
     if (!updatedListing) throw new ExpressError("Listing not found", 404);
+    await logAction(req, "listing.updated", "Listing", updatedListing._id, updatedListing.title, { fields: Object.keys(updateData) });
     req.flash("success", "Listing updated successfully!");
     res.redirect(`/listings/${id}`);
 };
@@ -202,6 +205,7 @@ module.exports.destroy = async (req, res) => {
     if (deleted.image?.filename) {
         await cloudinary.uploader.destroy(deleted.image.filename);
     }
+    await logAction(req, "listing.deleted", "Listing", deleted._id, deleted.title, { location: deleted.location, country: deleted.country });
     req.flash("success", "Listing deleted successfully!");
     res.redirect("/listings");
 };

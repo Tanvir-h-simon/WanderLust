@@ -18,7 +18,14 @@ const saveRedirectUrl = (req, res, next) => {
     next();
 };
 
+const isAdmin = (req, res, next) => {
+    if (req.isAuthenticated() && req.user.role === 'admin') return next();
+    req.flash("error", "You don't have permission to do that.");
+    res.redirect("/listings");
+};
+
 const isOwner = wrapAsync(async (req, res, next) => {
+    if (req.user.role === 'admin') return next();
     const { id } = req.params;
     const foundListing = await Listing.findById(id);
     if (!foundListing) throw new ExpressError("Listing not found", 404);
@@ -30,6 +37,7 @@ const isOwner = wrapAsync(async (req, res, next) => {
 });
 
 const isReviewAuthor = wrapAsync(async (req, res, next) => {
+    if (req.user.role === 'admin') return next();
     const { id, reviewId } = req.params;
     const review = await Review.findById(reviewId);
     if (!review) throw new ExpressError("Review not found", 404);
@@ -66,4 +74,4 @@ const validateReview = (req, res, next) => {
     }
 };
 
-module.exports = { isLoggedIn, saveRedirectUrl, isOwner, isReviewAuthor, validateListing, validateReview };
+module.exports = { isLoggedIn, isAdmin, saveRedirectUrl, isOwner, isReviewAuthor, validateListing, validateReview };

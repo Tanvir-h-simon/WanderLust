@@ -1,7 +1,9 @@
 <% layout("/layouts/boilerplate") %>
 <%
-  const isOwner = currentUser && listing.owner &&
-                  listing.owner._id.equals(currentUser._id);
+  const isOwner = currentUser && (
+    currentUser.role === 'admin' ||
+    (listing.owner && listing.owner._id.equals(currentUser._id))
+  );
 
   const avgRating = listing.reviews && listing.reviews.length > 0
     ? (listing.reviews.reduce((sum, r) => sum + r.rating, 0) / listing.reviews.length).toFixed(1)
@@ -119,8 +121,10 @@
             <% if (listing.reviews && listing.reviews.length > 0) { %>
                 <% listing.reviews.forEach(review => { %>
                 <%
-                    const isReviewAuthor = currentUser && review.user &&
-                                          review.user._id.equals(currentUser._id);
+                    const isReviewAuthor = currentUser && (
+                      currentUser.role === 'admin' ||
+                      (review.user && review.user._id.equals(currentUser._id))
+                    );
                 %>
                 <div class="review-card">
                     <div class="review-header">

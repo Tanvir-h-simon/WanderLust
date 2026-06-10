@@ -35,6 +35,7 @@ const mongoSanitize = require("./middleware/sanitize");
 const listingRoutes = require("./routes/listings");
 const userRoutes = require("./routes/users");
 const reviewRoutes = require("./routes/reviews");
+const adminRoutes = require("./routes/admin");
 
 // Database
 const dbUrl = process.env.MONGO_ATLAS_URL;
@@ -143,6 +144,7 @@ app.use((req, res, next) => {
     res.locals.success = success;
     res.locals.error = error;
     res.locals.currentUser = req.user;
+    res.locals.isAdmin = req.user && req.user.role === 'admin';
     res.locals.mapboxToken = process.env.MAPBOX_TOKEN;
     res.locals.showCategoryBar = false;   // listings index sets this to true
     res.locals.activeCategory = "";
@@ -181,10 +183,11 @@ app.get("/", wrapAsync(async (req, res) => {
     res.render("pages/home.ejs", { featuredListings });
 }));
 
-// Routes 
+// Routes
 app.use("/listings", listingRoutes);
 app.use("/", userRoutes);
 app.use("/listings/:id/reviews", reviewRoutes);
+app.use("/admin", adminRoutes);
 
 // 404 
 app.use((req, res, next) => {
@@ -216,7 +219,8 @@ process.on('uncaughtException', (err) => {
     process.exit(1);
 });
 
-// Server 
-app.listen(8080, () => {
-    console.log("Server is running on port 8080");
+// Server
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });

@@ -1,0 +1,72 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo" style="background: linear-gradient(135deg, #1a1a2e, #16213e); color: #e94560;">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h2 class="auth-title">Admin Portal</h2>
+            <p class="auth-subtitle">WanderLust Administration</p>
+        </div>
+
+        <form action="/admin/login" method="POST" class="auth-form" novalidate>
+            <div class="auth-field">
+                <label for="username" class="auth-label">
+                    <i class="fa-solid fa-user-shield"></i> Admin Username
+                </label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    class="auth-input"
+                    placeholder="Enter admin username"
+                    required
+                    autocomplete="username"
+                />
+            </div>
+
+            <div class="auth-field">
+                <label for="password" class="auth-label">
+                    <i class="fa-solid fa-lock"></i> Password
+                </label>
+                <div class="auth-input-group">
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="auth-input"
+                        placeholder="Enter admin password"
+                        required
+                        autocomplete="current-password"
+                    />
+                    <button type="button" class="toggle-password" onclick="togglePassword('password', this)" tabindex="-1">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="auth-btn" style="background: linear-gradient(135deg, #1a1a2e, #e94560);">
+                <i class="fa-solid fa-right-to-bracket"></i> Access Admin Panel
+            </button>
+        </form>
+
+        <p class="auth-switch" style="font-size: 0.8rem; color: #999;">
+            <a href="/login" class="auth-link">Regular user login</a>
+        </p>
+    </div>
+</div>
+
+<script>
+    function togglePassword(fieldId, btn) {
+        const input = document.getElementById(fieldId);
+        const icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fa-solid fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fa-solid fa-eye';
+        }
+    }
+</script>
