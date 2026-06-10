@@ -13,9 +13,13 @@ A full-stack accommodation booking platform inspired by Airbnb. Users can browse
 - Automatic geocoding of each listing's location into map coordinates
 - Price, max guests, location, and country fields
 
+<img width="1919" height="1114" alt="Screenshot 2026-06-10 191539" src="https://github.com/user-attachments/assets/09a2e403-9299-4d30-909e-bbace72620cf" />
+
 **Maps**
 - Interactive Mapbox globe that plots every listing with a price marker
 - Per-listing location map on the detail page
+
+<img width="1919" height="1111" alt="Screenshot 2026-06-10 191605" src="https://github.com/user-attachments/assets/68055524-68fe-4591-b775-89c103feea9a" />
 
 **Reviews and ratings**
 - Authenticated users can post reviews with a 1 to 5 star rating and a comment
@@ -32,6 +36,10 @@ A full-stack accommodation booking platform inspired by Airbnb. Users can browse
 **Admin**
 - Dedicated admin login portal
 - Admin audit log that records listing and review actions with actor, timestamp, target, and IP address
+
+<img width="1919" height="1115" alt="Screenshot 2026-06-10 191756" src="https://github.com/user-attachments/assets/6a66c682-87d9-40bc-af5f-8a55c9a18399" />
+
+<img width="1919" height="1111" alt="Screenshot 2026-06-10 191831" src="https://github.com/user-attachments/assets/09dbc209-b92a-434d-9b04-86e5550b07e2" />
 
 **Currency**
 - Switch between USD and BDT, with the preference saved to the session
@@ -111,12 +119,12 @@ npm install
 Create a `.env` file in the project root:
 
 ```
-MONGO_ATLAS_URL=your_mongodb_atlas_connection_string
-SECRET=your_session_secret
-CLOUD_NAME=your_cloudinary_cloud_name
-API_KEY=your_cloudinary_api_key
-CLOUD_API_SECRET=your_cloudinary_api_secret
-MAPBOX_TOKEN=your_mapbox_token
+MONGO_ATLAS_URL=
+SECRET=
+CLOUD_NAME=
+API_KEY=
+CLOUD_API_SECRET=
+MAPBOX_TOKEN=
 ```
 
 The app checks for all of these on startup and exits with a clear message if any are missing.
